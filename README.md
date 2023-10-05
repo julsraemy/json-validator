@@ -4,19 +4,37 @@ json-schema validation of linked.art resources
 
 ## Validation
 
-`schema-test.py` shows how to validate records:
+`schema-test.py` shows how to validate records. 
 
-In particular:
+To validate JSON data against a specific Linked Art schema, use the following command:
+
+```bash
+python schema-test.py -i "INSTANCE" -s "SCHEMA_NAME"
 ```
-# load the appropriate schema json into schema here
-v = Draft7Validator(schema)
-# load the appropriate instance json into data here
-errs = []
-for error in v.iter_errors(data):
-	errs.append(error)
-	print(f"  /{'/'.join([str(x) for x in error.absolute_path])} --> {error.message} ")
-if not errs:
-	print("Validated!")
+
+Replace `INSTANCE` with the URL or the path to the JSON instance to validate, and `SCHEMA_NAME` with the name of the schema to validate against (e.g., "core", "concept", "digital", etc.).
+
+### Schemas
+
+Schemas are stored in the `schema` directory.
+- concept
+- digital
+- event
+- group
+- image
+- object
+- place
+- person
+- provenance
+- set
+- text
+
+## Example
+
+To validate a JSON instance against the "set" schema:
+
+```bash
+python schema-test.py -i "https://data.participatory-archives.ch/set/12.json" -s set
 ```
 
 Output from the script is, for example:

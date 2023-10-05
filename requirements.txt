@@ -1,0 +1,4 @@
+json_schema_for_humans==0.46
+jsonschema==4.19.1
+referencing==0.30.2
+Requests==2.31.0
