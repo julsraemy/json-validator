@@ -17,8 +17,21 @@ def merge_schemas(*schemas):
         merged_schema.update(schema)
     return merged_schema
 
-def validate_json(json_data, schema):
-    return list(Draft202012Validator(schema).iter_errors(json_data))
+def validate_json(json_data, schema, allow_underscore_props=False):
+    errs = []
+    validator = Draft202012Validator(schema)
+
+    for error in validator.iter_errors(json_data):
+        if error.validator == 'additionalProperties':
+            aps = []
+            for ap in find_additional_properties(error.instance, error.schema):
+                if not allow_underscore_props and ap[0] == '_':
+                    aps.append(ap)
+            if not aps:
+                continue
+        errs.append(error)
+
+    return errs
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Validate JSON data against a schema.")
@@ -41,7 +54,7 @@ if __name__ == "__main__":
     data = resp.json()
 
     # Allow properties with an underscore prefix
-    allow_underscore_props = True
+    allow_underscore_props = Trueclear
 
     print("-"*120)
     print("Processing: %s" % instance)
@@ -49,7 +62,7 @@ if __name__ == "__main__":
     # Validate JSON data against the merged schema
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=DeprecationWarning)
-        errs = validate_json(data, merged_schema)
+        errs = validate_json(data, merged_schema, allow_underscore_props=True)
 
     if not errs:
         print("  Validated!")
