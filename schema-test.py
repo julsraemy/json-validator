@@ -40,6 +40,9 @@ if __name__ == "__main__":
     resp = requests.get(instance)
     data = resp.json()
 
+    # Allow properties with an underscore prefix
+    allow_underscore_props = True
+
     print("-"*120)
     print("Processing: %s" % instance)
 
