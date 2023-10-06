@@ -3,7 +3,6 @@ import json
 import argparse
 import requests
 import warnings
-from referencing import Registry, Resource
 from jsonschema import validate, Draft202012Validator
 from jsonschema.exceptions import ValidationError
 from jsonschema._utils import find_additional_properties
@@ -31,33 +30,7 @@ if __name__ == "__main__":
     # Load the core schema and resolve references
     schema_dir = "schema"
     core_schema_contents = load_json_from_file(os.path.join(schema_dir, "core.json"))
-    core_schema = Resource.from_contents(core_schema_contents)
-    core_registry = Registry().with_resources([
-        ("https://linked.art/api/1.0/schema/core.json", core_schema),
-        ("core.json", core_schema)
-    ])
-
-    schema_file_mapping = {
-        "core": "core.json",
-        "concept": "concept.json",
-        "digital": "digital.json",
-        "event": "event.json",
-        "group": "group.json",
-        "image": "image.json",
-        "object": "object.json",
-        "place": "place.json",
-        "person": "person.json",
-        "provenance": "provenance.json",
-        "set": "set.json",
-        "text": "text.json"
-    }
-
-    if args.schema not in schema_file_mapping:
-        print("Invalid schema specified.")
-        exit(1)
-
-    specified_schema_contents = load_json_from_file(os.path.join(schema_dir, schema_file_mapping[args.schema]))
-    specified_schema = Resource.from_contents(specified_schema_contents)
+    specified_schema_contents = load_json_from_file(os.path.join(schema_dir, f"{args.schema}.json"))
 
     # Merge the core and specified schemas
     merged_schema = merge_schemas(core_schema_contents, specified_schema_contents)
@@ -69,7 +42,8 @@ if __name__ == "__main__":
 
     print("-"*120)
     print("Processing: %s" % instance)
-    
+
+    # Validate JSON data against the merged schema
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=DeprecationWarning)
         errs = validate_json(data, merged_schema)
@@ -78,14 +52,6 @@ if __name__ == "__main__":
         print("  Validated!")
     else:
         print("  Validation failed. Validation errors:")
-        print("errs:", errs)  # Print the validation errors
 
         for idx, error in enumerate(errs, start=1):
-            if error.validator == 'additionalProperties':
-                aps = []
-                for ap in find_additional_properties(error.instance, error.schema):
-                    if ap[0] != '_':
-                        aps.append(ap)
-                if not aps:
-                    continue
-                print(f"    Error {idx}: /{'/'.join([str(x) for x in error.absolute_path])} --> {error.message}")
+            print(f"  Error {idx}: /{'/'.join([str(x) for x in error.absolute_path])} --> {error.message}")
