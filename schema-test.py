@@ -54,7 +54,7 @@ if __name__ == "__main__":
     data = resp.json()
 
     # Allow properties with an underscore prefix
-    allow_underscore_props = Trueclear
+    allow_underscore_props = True
 
     print("-"*120)
     print("Processing: %s" % instance)
