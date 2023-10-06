@@ -74,15 +74,18 @@ if __name__ == "__main__":
         warnings.filterwarnings("ignore", category=DeprecationWarning)
         errs = validate_json(data, merged_schema)
 
-    for error in errs:
-        if error.validator == 'additionalProperties':
-            aps = []
-            for ap in find_additional_properties(error.instance, error.schema):
-                if ap[0] != '_':
-                    aps.append(ap)
-            if not aps:
-                continue
-        print(f"  /{'/'.join([str(x) for x in error.absolute_path])} --> {error.message}")
-
     if not errs:
         print("  Validated!")
+    else:
+        print("  Validation failed. Validation errors:")
+        print("errs:", errs)  # Print the validation errors
+
+        for idx, error in enumerate(errs, start=1):
+            if error.validator == 'additionalProperties':
+                aps = []
+                for ap in find_additional_properties(error.instance, error.schema):
+                    if ap[0] != '_':
+                        aps.append(ap)
+                if not aps:
+                    continue
+                print(f"    Error {idx}: /{'/'.join([str(x) for x in error.absolute_path])} --> {error.message}")
